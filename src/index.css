@@ -514,6 +514,13 @@ body {
 .waiting-host-tag { margin-left: auto; font-size: 11px; color: #2ecc71; font-weight: 600; text-transform: uppercase; }
 .waiting-hint { color: var(--text-muted); font-size: 14px; text-align: center; }
 
+/* ─── Waiting Screen ─────────────────────────────────────────────────────── */
+.waiting-screen { display: flex; align-items: center; justify-content: center; min-height: 100dvh; padding: 24px; }
+.waiting-screen-content { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.waiting-spinner { font-size: 48px; }
+.waiting-screen-content h2 { font-size: 24px; font-weight: 700; }
+.waiting-screen-hint { color: var(--text-muted); font-size: 14px; }
+
 /* ─── Game Over ───────────────────────────────────────────────────────────── */
 .gameover-trophy { font-size: 72px; }
 .gameover-winner { font-size: 28px; font-weight: 700; color: var(--accent); }

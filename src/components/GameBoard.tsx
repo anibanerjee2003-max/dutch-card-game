@@ -15,12 +15,56 @@ import {
 interface Props {
   state: GameState;
   dispatch: (action: Action) => void;
+  myName: string;
 }
 
-export function GameBoard({ state, dispatch }: Props) {
+function getActivePlayerName(state: GameState): string | null {
+  const { phase, players, currentPlayer, peekPhase, activeWildcard, tenPending, giveCard } = state;
+  switch (phase) {
+    case 'peek_privacy':
+    case 'peek_viewing':
+      return peekPhase ? players[peekPhase.playerIdx]?.name ?? null : null;
+    case 'turn_privacy':
+    case 'turn_draw':
+    case 'turn_decide':
+    case 'final_turn_privacy':
+    case 'final_turn_draw':
+    case 'final_turn_decide':
+      return players[currentPlayer]?.name ?? null;
+    case 'jack_privacy':
+    case 'jack_choosing':
+    case 'queen_privacy':
+    case 'queen_peeking':
+      return activeWildcard ? players.find(p => p.id === activeWildcard.playedBy)?.name ?? null : null;
+    case 'ten_privacy':
+    case 'ten_viewing':
+      return tenPending ? players.find(p => p.id === tenPending.tenPlayerId)?.name ?? null : null;
+    case 'give_card':
+      return giveCard ? players.find(p => p.id === giveCard.actorId)?.name ?? null : null;
+    default:
+      return null; // matching, blunder, scoring, game_over — everyone sees
+  }
+}
+
+export function GameBoard({ state, dispatch, myName }: Props) {
   const { phase, players, currentPlayer, drawnCard, discard, deck } = state;
   const cp = players[currentPlayer];
   const top = topCard(discard);
+
+  // ── waiting screen for non-active players ─────────────────────────────────
+
+  const activePlayerName = getActivePlayerName(state);
+  if (activePlayerName && myName !== activePlayerName) {
+    return (
+      <div className="waiting-screen">
+        <div className="waiting-screen-content">
+          <div className="waiting-spinner">⏳</div>
+          <h2>Waiting for {activePlayerName}…</h2>
+          <p className="waiting-screen-hint">Put the device down — it's not your turn yet</p>
+        </div>
+      </div>
+    );
+  }
 
   // ── privacy screens ───────────────────────────────────────────────────────
 

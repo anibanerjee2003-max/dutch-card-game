@@ -98,5 +98,5 @@ export default function App() {
     );
   }
 
-  return <GameBoard state={state} dispatch={dispatch} />;
+  return <GameBoard state={state} dispatch={dispatch} myName={myName} />;
 }
