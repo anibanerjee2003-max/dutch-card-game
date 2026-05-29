@@ -3,9 +3,10 @@ import { useState } from 'react';
 interface Props {
   onStart: (playerNames: string[]) => void;
   existingPlayers?: string[]; // for "new round" — pre-fill names
+  roomCode?: string;
 }
 
-export function SetupScreen({ onStart, existingPlayers }: Props) {
+export function SetupScreen({ onStart, existingPlayers, roomCode }: Props) {
   const [names, setNames] = useState<string[]>(
     existingPlayers ?? ['', '', '', '']
   );
@@ -34,7 +35,10 @@ export function SetupScreen({ onStart, existingPlayers }: Props) {
     <div className="setup-screen">
       <div className="setup-card">
         <h1 className="setup-title">Dutch</h1>
-        <p className="setup-subtitle">2–6 players · shared device</p>
+        {roomCode
+          ? <p className="setup-subtitle">Room code: <strong>{roomCode}</strong> · share with friends</p>
+          : <p className="setup-subtitle">2–6 players · shared device</p>
+        }
 
         <div className="setup-players">
           {names.map((name, i) => (
