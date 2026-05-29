@@ -503,6 +503,17 @@ body {
 .lobby-divider { text-align: center; color: var(--text-muted); margin: 8px 0; font-size: 14px; }
 .lobby-error { color: var(--danger); font-size: 14px; text-align: center; margin-top: 8px; }
 
+/* ─── Waiting Room ────────────────────────────────────────────────────────── */
+.waiting-room-code { text-align: center; margin-bottom: 20px; }
+.waiting-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.waiting-code { font-size: 48px; font-weight: 800; letter-spacing: 10px; color: var(--accent); }
+.waiting-players { width: 100%; display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.waiting-player-row { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: rgba(255,255,255,0.06); border-radius: 8px; font-size: 16px; }
+.waiting-player-you { background: rgba(243,156,18,0.15); border: 1px solid rgba(243,156,18,0.3); }
+.waiting-you-tag { margin-left: auto; font-size: 11px; color: var(--accent); font-weight: 600; text-transform: uppercase; }
+.waiting-host-tag { margin-left: auto; font-size: 11px; color: #2ecc71; font-weight: 600; text-transform: uppercase; }
+.waiting-hint { color: var(--text-muted); font-size: 14px; text-align: center; }
+
 /* ─── Game Over ───────────────────────────────────────────────────────────── */
 .gameover-trophy { font-size: 72px; }
 .gameover-winner { font-size: 28px; font-weight: 700; color: var(--accent); }

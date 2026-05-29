@@ -4,7 +4,7 @@ import { INITIAL_STATE } from '../game/reducer';
 import type { GameState } from '../types';
 
 interface Props {
-  onRoomReady: (roomId: string, roomCode: string, state: GameState) => void;
+  onRoomReady: (roomId: string, roomCode: string, state: GameState, myName: string, isHost: boolean, lobbyPlayers: string[]) => void;
 }
 
 function generateCode(): string {
@@ -12,17 +12,22 @@ function generateCode(): string {
 }
 
 export function LobbyScreen({ onRoomReady }: Props) {
+  const [name, setName] = useState('');
   const [joinCode, setJoinCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const nameValid = name.trim().length >= 1;
+
   async function createRoom() {
+    if (!nameValid) return;
     setLoading(true);
     setError('');
     const code = generateCode();
+    const lobbyPlayers = [name.trim()];
     const { data, error: err } = await supabase
       .from('rooms')
-      .insert({ code, state: INITIAL_STATE })
+      .insert({ code, state: INITIAL_STATE, lobby_players: lobbyPlayers })
       .select()
       .single();
 
@@ -31,12 +36,14 @@ export function LobbyScreen({ onRoomReady }: Props) {
       setLoading(false);
       return;
     }
-    onRoomReady(data.id, data.code, data.state as GameState);
+    onRoomReady(data.id, data.code, data.state as GameState, name.trim(), true, lobbyPlayers);
   }
 
   async function joinRoom() {
+    if (!nameValid) return;
     setLoading(true);
     setError('');
+
     const { data, error: err } = await supabase
       .from('rooms')
       .select()
@@ -48,7 +55,15 @@ export function LobbyScreen({ onRoomReady }: Props) {
       setLoading(false);
       return;
     }
-    onRoomReady(data.id, data.code, data.state as GameState);
+
+    // Add this player's name to lobby
+    const updatedPlayers = [...(data.lobby_players as string[] || []), name.trim()];
+    await supabase
+      .from('rooms')
+      .update({ lobby_players: updatedPlayers })
+      .eq('id', data.id);
+
+    onRoomReady(data.id, data.code, data.state as GameState, name.trim(), false, updatedPlayers);
   }
 
   return (
@@ -57,13 +72,22 @@ export function LobbyScreen({ onRoomReady }: Props) {
         <h1 className="setup-title">Dutch</h1>
         <p className="setup-subtitle">Online multiplayer</p>
 
-        <div className="lobby-section">
-          <button className="btn btn-primary btn-lg" onClick={createRoom} disabled={loading}>
+        <input
+          className="setup-input"
+          value={name}
+          onChange={e => setName(e.target.value)}
+          placeholder="Your name"
+          maxLength={16}
+          autoFocus
+        />
+
+        <div className="lobby-section" style={{ marginTop: '12px' }}>
+          <button className="btn btn-primary btn-lg" onClick={createRoom} disabled={loading || !nameValid}>
             {loading ? 'Creating...' : 'Create Room'}
           </button>
         </div>
 
-        <div className="lobby-divider">— or join —</div>
+        <div className="lobby-divider">— or join existing room —</div>
 
         <div className="lobby-section">
           <input
@@ -76,7 +100,7 @@ export function LobbyScreen({ onRoomReady }: Props) {
           <button
             className="btn btn-outline"
             onClick={joinRoom}
-            disabled={loading || joinCode.trim().length < 4}
+            disabled={loading || !nameValid || joinCode.trim().length < 4}
           >
             {loading ? 'Joining...' : 'Join Room'}
           </button>
