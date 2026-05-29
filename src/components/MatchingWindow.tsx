@@ -4,23 +4,24 @@ import { CardDisplay } from './CardDisplay';
 
 interface Props {
   state: GameState;
-  onSelectActor: (actorId: number) => void;
+  myName: string;
   onPlayCard: (actorId: number, ownerId: number, slotIdx: number) => void;
   onClose: () => void;
   onDeclareDutch?: () => void;
 }
 
-export function MatchingWindow({ state, onSelectActor, onPlayCard, onClose, onDeclareDutch }: Props) {
+export function MatchingWindow({ state, myName, onPlayCard, onClose, onDeclareDutch }: Props) {
   const top = topCard(state.discard);
-  const { matchingActorId } = state;
-  const actor = state.players.find(p => p.id === matchingActorId);
+  const myPlayer = state.players.find(p => p.name === myName);
 
   return (
     <div className="matching-overlay">
       <div className="matching-banner">
         Matching Window Open
         <span className="matching-whose-turn">
-          {state.isFinalTurn ? `${state.players[state.currentPlayer].name}'s final turn` : `${state.players[state.currentPlayer].name}'s turn`}
+          {state.isFinalTurn
+            ? `${state.players[state.currentPlayer].name}'s final turn`
+            : `${state.players[state.currentPlayer].name}'s turn`}
         </span>
       </div>
 
@@ -29,21 +30,16 @@ export function MatchingWindow({ state, onSelectActor, onPlayCard, onClose, onDe
         {top ? <CardDisplay card={top} size="lg" /> : <span>—</span>}
       </div>
 
-      {/* Who's playing? */}
-      <div className="matching-actor-select">
-        <span className="matching-label">Who's playing?</span>
-        <div className="matching-actor-btns">
-          {state.players.map(p => (
-            <button
-              key={p.id}
-              className={`btn btn-sm${matchingActorId === p.id ? ' btn-primary' : ' btn-outline'}`}
-              onClick={() => onSelectActor(p.id)}
-            >
-              {p.name}
-            </button>
+      {/* Activity feed */}
+      {state.matchLog.length > 0 && (
+        <div className="match-feed">
+          {state.matchLog.map((entry, i) => (
+            <div key={i} className={`match-feed-entry${i === 0 ? ' match-feed-entry--new' : ''}`}>
+              {entry}
+            </div>
           ))}
         </div>
-      </div>
+      )}
 
       {/* All hands — tap to attempt match */}
       <div className="matching-all-hands">
@@ -52,15 +48,15 @@ export function MatchingWindow({ state, onSelectActor, onPlayCard, onClose, onDe
             <span className="wc-player-name">{p.name}</span>
             <div className="wc-hand">
               {p.hand.map((card, idx) => {
-                const clickable = matchingActorId !== null && card !== null;
+                const clickable = myPlayer !== undefined && card !== null;
                 return (
                   <CardDisplay
                     key={idx}
                     card={card === null ? null : 'back'}
                     size="sm"
                     dimmed={!clickable}
-                    onClick={clickable ? () => onPlayCard(matchingActorId!, p.id, idx) : undefined}
-                    label={actor ? `${idx + 1}` : undefined}
+                    onClick={clickable ? () => onPlayCard(myPlayer!.id, p.id, idx) : undefined}
+                    label={`${idx + 1}`}
                   />
                 );
               })}
@@ -69,7 +65,7 @@ export function MatchingWindow({ state, onSelectActor, onPlayCard, onClose, onDe
         ))}
       </div>
 
-      {!state.isFinalTurn && !state.isPreGameMatching && onDeclareDutch && (
+      {!state.isFinalTurn && !state.isPreGameMatching && onDeclareDutch && myPlayer && (
         <button
           className="btn btn-dutch matching-dutch"
           onClick={() => {

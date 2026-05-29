@@ -172,7 +172,7 @@ export function GameBoard({ state, dispatch, myName }: Props) {
     return (
       <MatchingWindow
         state={state}
-        onSelectActor={actorId => dispatch({ type: 'SET_MATCHING_ACTOR', actorId })}
+        myName={myName}
         onPlayCard={(actorId, ownerId, slotIdx) =>
           dispatch({ type: 'PLAY_MATCH', actorId, ownerId, slotIdx })
         }

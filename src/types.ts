@@ -82,4 +82,5 @@ export interface GameState {
   blunderMsg: string;
   matchingActorId: number | null; // which player is currently selected in matching window
   isPreGameMatching: boolean;     // true only for the initial matching window before any turn
+  matchLog: string[];             // recent matching actions for activity feed
 }

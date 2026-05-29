@@ -43,12 +43,25 @@ export const INITIAL_STATE: GameState = {
   blunderMsg: '',
   matchingActorId: null,
   isPreGameMatching: false,
+  matchLog: [],
 };
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
 function nextIdx(current: number, total: number) {
   return (current + 1) % total;
+}
+
+function suitSymbol(suit: string): string {
+  return { hearts: '♥', diamonds: '♦', clubs: '♣', spades: '♠' }[suit] ?? suit;
+}
+
+function cardLabel(card: { rank: string; suit: string }): string {
+  return `${card.rank}${suitSymbol(card.suit)}`;
+}
+
+function addLog(state: { matchLog: string[] }, entry: string) {
+  return [entry, ...state.matchLog].slice(0, 12);
 }
 
 
@@ -406,6 +419,7 @@ export function gameReducer(state: GameState, action: Action): GameState {
             discard: newDiscard,
             blunderMsg: `Blunder! ${actor.name} played the wrong card — they drew 1 penalty card.`,
             phase: 'blunder_notice',
+            matchLog: addLog(state, `💥 ${actor.name} had a blunder — +1 card`),
           };
         } catch {
           return { ...state, blunderMsg: `Blunder! ${actor.name} played wrong.`, phase: 'blunder_notice' };
@@ -420,7 +434,7 @@ export function gameReducer(state: GameState, action: Action): GameState {
       const newQueue = queueWildcard(state.wildcardQueue, card, action.actorId);
 
       if (isCrossPlay) {
-        // Actor must give one of their cards to the owner
+        const logEntry = `✓ ${actor.name} played ${owner.name}'s slot ${action.slotIdx + 1} (${cardLabel(card)})`;
         return {
           ...state,
           players: newPlayers,
@@ -430,6 +444,7 @@ export function gameReducer(state: GameState, action: Action): GameState {
           phase: 'give_card',
           matching: false,
           matchingActorId: null,
+          matchLog: addLog(state, logEntry),
         };
       }
 
@@ -439,6 +454,7 @@ export function gameReducer(state: GameState, action: Action): GameState {
         discard: newDiscard,
         wildcardQueue: newQueue,
         matchingActorId: null,
+        matchLog: addLog(state, `✓ ${actor.name} matched ${cardLabel(card)}`),
       };
     }
 
